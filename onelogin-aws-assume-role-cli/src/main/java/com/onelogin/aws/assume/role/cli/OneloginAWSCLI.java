@@ -48,6 +48,7 @@ public class OneloginAWSCLI {
 	private static String awsRegion = null;
 	private static String awsAccountId = null;
 	private static String awsRoleName = null;
+	private static Integer duration = 900;
 
 	public static Boolean commandParser(final String[] commandLineArguments) {
 		final CommandLineParser cmd = new DefaultParser();
@@ -146,6 +147,13 @@ public class OneloginAWSCLI {
 				}
 			}
 
+			if (commandLine.hasOption("duration")) {
+				value = commandLine.getOptionValue("duration");
+				if (value != null && !value.isEmpty()) {
+					duration = Integer.parseInt(value);
+				}
+			}
+
 			if (((awsAccountId != null && awsAccountId.isEmpty()) && (awsRoleName == null || awsRoleName.isEmpty())) || ((awsRoleName != null && awsRoleName.isEmpty()) && (awsAccountId == null || awsAccountId.isEmpty()))) {
 				System.err.println("--aws-account-id and --aws-role-name need to be set together");
 				return false;
@@ -173,6 +181,7 @@ public class OneloginAWSCLI {
 		options.addOption(null, "password", true, "OneLogin password.");
 		options.addOption(null, "aws-account-id", true, "AWS Account ID.");
 		options.addOption(null, "aws-role-name", true, "AWS Role Name.");
+		options.addOption(null, "duration", true, "Duration of the session token (default: 900 - 15 minutes)");
 
 		return options;
 	}
@@ -304,7 +313,8 @@ public class OneloginAWSCLI {
 				}
 
 				AssumeRoleWithSAMLRequest assumeRoleWithSAMLRequest = new AssumeRoleWithSAMLRequest()
-						.withPrincipalArn(principalArn).withRoleArn(roleArn).withSAMLAssertion(samlResponse);
+						.withPrincipalArn(principalArn).withRoleArn(roleArn).withSAMLAssertion(samlResponse)
+						.withDurationSeconds(duration);
 
 				if (i == 0) {
 					// AWS REGION
